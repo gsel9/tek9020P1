@@ -54,6 +54,8 @@ class MinErrorClassifier(BaseEstimator, ClassifierMixin):
 		self.w[i, :] = sigma_hat_inv @ mu_hat
 
 		quad = mu_hat.T @ sigma_hat_inv @ mu_hat
+
+		# ERROR: Check if should be abs(det(C)) or only det()?
 		log_det = np.log(abs(np.linalg.det(sigma_hat)))
 
 		self.b[i] = -0.5 * quad - 0.5 * log_det + np.log(P_i)
