@@ -17,7 +17,7 @@ class MinErrorClassifier(BaseEstimator, ClassifierMixin):
 	# TODO: Returna  dict of whatever params is used for the clf.
 	def get_params(self, deep=True):
 		
-		return #{"alpha": self.alpha, "recursive": self.recursive}
+		return {} #{"alpha": self.alpha, "recursive": self.recursive}
 
 	def set_params(self, **parameters):
 
@@ -55,7 +55,8 @@ class MinErrorClassifier(BaseEstimator, ClassifierMixin):
 
 		quad = mu_hat.T @ sigma_hat_inv @ mu_hat
 
-		# ERROR: Check if should be abs(det(C)) or only det()?
+		# QUESTION: Should be abs(det(C)) or only det()? Either way,
+		# log of negative value is undefined.
 		log_det = np.log(abs(np.linalg.det(sigma_hat)))
 
 		self.b[i] = -0.5 * quad - 0.5 * log_det + np.log(P_i)
