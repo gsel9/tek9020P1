@@ -22,9 +22,18 @@ def main():
 
 	X, y = from_file("data/ds-1.txt")
 
-	model = MinErrorClassifier()
+	# Step 1:
+	#select_optimal_features(model, X, y, "results")
 
-	select_optimal_features(model, X, y, "results")
+	# Step 2:
+	models = [
+		MinErrorClassifier(),
+	]
+
+	opt_features = np.load(f"{path_to_results}/opt_features.npy")
+	for model in models:
+
+		model_performane_estimate(X[:, opt_features], y)
 
 
 if __name__ == "__main__":

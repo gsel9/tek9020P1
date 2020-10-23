@@ -37,3 +37,15 @@ def feature_selection_cv(model, X, y, cv=5):
 			opt_features = combo
 
 	return opt_cv_results, opt_features
+
+
+def model_performane_estimate(cv=None):
+
+	model.train(X_train, y_train)
+
+	if cv is None:
+		return cross_validate(model, X_test, y_test, scoring=make_scorer(tpr))
+
+	y_pred = model.predict(X_test)
+
+	return tpr(y_true, y_pred)
