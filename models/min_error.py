@@ -9,6 +9,8 @@ class MinErrorClassifier(BaseEstimator, ClassifierMixin):
 	"""
 	"""
 
+	NAME = "MinErrorClassifier"
+
 	def __init__(self):
 		
 		# Placeholders for the learned parameters of each class. 
@@ -25,6 +27,11 @@ class MinErrorClassifier(BaseEstimator, ClassifierMixin):
 			setattr(self, parameter, value)
 
 		return self
+
+	@property 
+	def name(self):
+
+		return self.NAME
 
 	@property 
 	def n_classes(self):

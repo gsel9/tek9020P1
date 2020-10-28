@@ -9,8 +9,15 @@ class NearNeighClassifier(BaseEstimator, ClassifierMixin):
 	"""
 	"""
 
+	NAME = "NearNeighClassifier"
+
 	def __init__(self):
 		pass
+
+	@property 
+	def name(self):
+
+		return self.NAME
 
 	# TODO: Returna  dict of whatever params is used for the clf.
 	def get_params(self, deep=True):
