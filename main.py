@@ -8,14 +8,17 @@ from models.min_error import MinErrorClassifier
 from models.less_squares import LessSquaresClassifier
 from models.nearest_neighbour import NearNeighClassifier
 
-from simulation.model_selection import feature_selection_cv
+from simulation.model_selection import (
+	feature_selection_cv, feature_selection_summary
+)
 
 
 def select_optimal_features(model, X, y, path_to_results):
 
-	cv_results, opt_features = feature_selection_cv(model, X, y, cv=5)
+	opt_cv_results, opt_features = feature_selection_cv(model, X, y, cv=5,
+														path_to_results=path_to_results)
 
-	pd.DataFrame(cv_results).to_csv(f"{path_to_results}/cv_results.csv")
+	pd.DataFrame(opt_cv_results).to_csv(f"{path_to_results}/opt_cv_results.csv")
 
 	np.save(f"{path_to_results}/opt_features.npy", opt_features)
 
@@ -25,7 +28,9 @@ def main():
 	X, y = from_file("data/ds-1.txt")
 
 	# Step 1:
-	select_optimal_features(NearNeighClassifier(), X, y, "results")
+	select_optimal_features(NearNeighClassifier(), X, y, "results/feature_selection_cv")
+
+	feature_selection_summary("results/feature_selection_cv")
 
 	# Step 2:
 	models = [
