@@ -17,7 +17,7 @@ class LessSquaresClassifier(BaseEstimator, ClassifierMixin):
     # TODO: Returna  dict of whatever params is used for the clf.
     def get_params(self, deep=True):
 
-        return  # {"alpha": self.alpha, "recursive": self.recursive}
+        return {}
 
     def set_params(self, **parameters):
 
