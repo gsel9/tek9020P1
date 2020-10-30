@@ -24,9 +24,9 @@ def select_optimal_features(model, X, y, path_to_results):
 
 	opt_results, opt_features = feature_selection(model, X, y, path_to_results)
 
-	pd.Series(opt_results).to_csv(f"{path_to_results}/opt_results.csv")
+	pd.Series(opt_results, name="error_rate").to_csv(f"{path_to_results}_opt_results.csv")
 
-	np.save(f"{path_to_results}/opt_features.npy", opt_features)
+	np.save(f"{path_to_results}_opt_features.npy", opt_features)
 
 
 def feature_selection(model, X, y, path_to_results):
@@ -60,8 +60,8 @@ def model_validation(X, y, model, path_to_results, results=None):
 
 	y_pred = model.predict(X_test)
 
-	np.save(f"{path_to_results}/{model.name}_y_pred.npy", y_pred)
-	np.save(f"{path_to_results}/{model.name}_y_true.npy", y_test)
+	np.save(f"{path_to_results}_y_pred.npy", y_pred)
+	np.save(f"{path_to_results}_y_true.npy", y_test)
 
 	if results is not None:
 		results[model.name] = error_rate(y_test, y_pred)

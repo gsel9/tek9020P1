@@ -17,25 +17,29 @@ def main():
 	path_to_data = "data"
 	path_to_results = "results"
 
-	X, y = from_file("data/ds-1.txt")
+	for dataset in ["ds-1.txt", "ds-2.txt", "ds-3.txt"]:
 
-	# Step 1:
-	select_optimal_features(NearNeighClassifier(), X, y, path_to_results)
+		X, y = from_file(f"{path_to_data}/{dataset}")
 
-	# Step 2:
-	models = [
-		MinErrorClassifier(),
-		NearNeighClassifier(),
-		LessSquaresClassifier()
-	]
+		# Step 1:
+		select_optimal_features(NearNeighClassifier(), X, y, f"{path_to_results}/{dataset}")
 
-	opt_features = np.load(f"{path_to_results}/opt_features.npy")
+		# Step 2:
+		models = [
+			MinErrorClassifier(),
+			NearNeighClassifier(),
+			LessSquaresClassifier()
+		]
 
-	results = {}
-	for model in models:
-		model_validation(X[:, opt_features], y, model, path_to_results, results=results)
+		opt_features = np.load(f"{path_to_results}/{dataset}_opt_features.npy")
 
-	pd.Series(results).to_csv(f"{path_to_results}/model_validation.csv")
+		results = {}
+		for model in models:
+			model_validation(X[:, opt_features], y, model, 
+							 f"{path_to_results}/{dataset}_{model.name}", 
+							 results=results)
+
+		pd.Series(results, name="error_rate").to_csv(f"{path_to_results}/{dataset}_model_validation.csv")
 
 
 if __name__ == "__main__":
