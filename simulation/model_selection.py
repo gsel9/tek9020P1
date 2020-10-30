@@ -1,31 +1,14 @@
-import os 
-
 from itertools import chain, combinations
-from collections import defaultdict
 
 import numpy as np 
-import pandas as pd
+import pandas as pd 
 
-from sklearn.metrics import make_scorer
-from sklearn.model_selection import cross_validate
-
-from .metrics import tpr
+from .splitting import train_test_split
 
 
-def feature_selection_summary(path_to_results):
+def error_rate(y_true, y_pred):
 
-	results = defaultdict(list)
-	for fname in os.listdir(path_to_results):
-
-		if fname.endswith("csv") and "results_summary" not in fname:
-
-			exp_results = pd.read_csv(f"{path_to_results}/{fname}", index_col=0)
-
-			results["run_id"].append(("_").join(fname.split("_")[1:]).split(".")[0])
-			results["std_score"].append(np.std(exp_results.test_score))
-			results["mean_score"].append(np.mean(exp_results.test_score))
-			
-	pd.DataFrame(results).to_csv(f"{path_to_results}/results_summary.csv")
+	return sum(y_true != y_pred) / len(y_true)
 
 
 def feature_combinations(n_elements):
@@ -37,41 +20,49 @@ def feature_combinations(n_elements):
 	return list(combos)
 
 
-def feature_selection_cv(model, X, y, path_to_results=None, cv=5):
-	"""Selects the optimal feature set using k-fold cross-validation.
-	"""
+def select_optimal_features(model, X, y, path_to_results):
+
+	opt_results, opt_features = feature_selection(model, X, y, path_to_results)
+
+	pd.Series(opt_results).to_csv(f"{path_to_results}/opt_results.csv")
+
+	np.save(f"{path_to_results}/opt_features.npy", opt_features)
+
+
+def feature_selection(model, X, y, path_to_results):
+	"""Selects the optimal feature set."""
 
 	feature_combos = feature_combinations(X.shape[1])
 
-	opt_cv_results, opt_features = None, None
-
-	opt_score = -1
+	results, best_score, opt_features = {}, -1, None 
 	for combo in feature_combos:
 
-		cv_results = cross_validate(model, X[:, combo], y, scoring=make_scorer(tpr))
+		X_train, X_test, y_train, y_test = train_test_split(X[:, combo], y)
 
-		if path_to_results is not None:
+		model.fit(X_train, y_train)
 
-			fname = ("_").join([str(c) for c in combo])
+		score = error_rate(y_test, model.predict(X_test))
+		if score > best_score:
 
-			pd.DataFrame(cv_results).to_csv(f"{path_to_results}/{model.name}_{fname}.csv")
-
-		if np.mean(cv_results["test_score"]) > opt_score:
-
-			opt_score = np.mean(cv_results["test_score"])
-			opt_cv_results = cv_results
+			best_score = score
 			opt_features = combo
 
-	return opt_cv_results, opt_features
-	
+		results[("_").join([str(c) for c in combo])] = score
 
-def model_performane_estimate(cv=None):
+	return results, combo
 
-	model.train(X_train, y_train)
 
-	if cv is None:
-		return cross_validate(model, X_test, y_test, scoring=make_scorer(tpr))
+def model_validation(X, y, model, path_to_results, results=None):
+
+	X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+	model.fit(X_train, y_train)
 
 	y_pred = model.predict(X_test)
 
-	return tpr(y_true, y_pred)
+	np.save(f"{path_to_results}/{model.name}_y_pred.npy", y_pred)
+	np.save(f"{path_to_results}/{model.name}_y_true.npy", y_test)
+
+	if results is not None:
+		results[model.name] = error_rate(y_test, y_pred)
+	

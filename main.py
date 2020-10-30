@@ -2,35 +2,25 @@ import numpy as np
 import pandas as pd 
 
 from data.load_data import from_file
-from data.splitting import train_test_split
 
 from models.min_error import MinErrorClassifier
 from models.less_squares import LessSquaresClassifier
 from models.nearest_neighbour import NearNeighClassifier
 
 from simulation.model_selection import (
-	feature_selection_cv, feature_selection_summary
+	select_optimal_features, model_validation
 )
-
-
-def select_optimal_features(model, X, y, path_to_results):
-
-	opt_cv_results, opt_features = feature_selection_cv(model, X, y, cv=5,
-														path_to_results=path_to_results)
-
-	pd.DataFrame(opt_cv_results).to_csv(f"{path_to_results}/opt_cv_results.csv")
-
-	np.save(f"{path_to_results}/opt_features.npy", opt_features)
 
 
 def main():
 
+	path_to_data = "data"
+	path_to_results = "results"
+
 	X, y = from_file("data/ds-1.txt")
 
 	# Step 1:
-	select_optimal_features(NearNeighClassifier(), X, y, "results/feature_selection_cv")
-
-	feature_selection_summary("results/feature_selection_cv")
+	select_optimal_features(NearNeighClassifier(), X, y, path_to_results)
 
 	# Step 2:
 	models = [
@@ -39,17 +29,13 @@ def main():
 		LessSquaresClassifier()
 	]
 
-	path_to_results = "results"
-
 	opt_features = np.load(f"{path_to_results}/opt_features.npy")
+
+	results = {}
 	for model in models:
+		model_validation(X[:, opt_features], y, model, path_to_results, results=results)
 
-		X_train, X_test, y_train, y_test = train_test_split(X[:, opt_features], y)
-
-		model.fit(X_train, y_train)
-
-		np.save(f"{path_to_results}/{model.name}_y_pred.npy", model.predict(X_test))
-		np.save(f"{path_to_results}/{model.name}_y_true.npy", y_test)	
+	pd.Series(results).to_csv(f"{path_to_results}/model_validation.csv")
 
 
 if __name__ == "__main__":
