@@ -75,7 +75,7 @@ class MinErrorClassifier(BaseEstimator, ClassifierMixin):
 		X, y = check_X_y(X, y)
 
 		# Store the classes seen during fit.
-		self.classes_ = unique_labels(y)
+		self.classes_ = unique_labels(y).astype(int)
 		if self.n_classes > 2:
 			raise ValueError("Target classes should be binary.")
 
